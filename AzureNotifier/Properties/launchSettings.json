@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "azure_notifier": {
+    "AzureNotifier": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7178",
+      "commandLineArgs": "--port 7151",
       "launchBrowser": false
     }
   }

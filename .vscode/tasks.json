@@ -2,6 +2,16 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"type": "func",
+			"dependsOn": "build (functions)",
+			"options": {
+				"cwd": "${workspaceFolder}/AzureNotifier/bin/Debug/net6.0"
+			},
+			"command": "host start",
+			"isBackground": true,
+			"problemMatcher": "$func-dotnet-watch"
+		},
+		{
 			"label": "clean (functions)",
 			"command": "dotnet",
 			"args": [
@@ -9,8 +19,11 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"type": "process",
-			"problemMatcher": "$msCompile"
+			"type": "shell",
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/AzureNotifier"
+			}
 		},
 		{
 			"label": "build (functions)",
@@ -20,13 +33,16 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"type": "process",
+			"type": "shell",
 			"dependsOn": "clean (functions)",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/AzureNotifier"
+			}
 		},
 		{
 			"label": "clean release (functions)",
@@ -38,8 +54,11 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"type": "process",
-			"problemMatcher": "$msCompile"
+			"type": "shell",
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/AzureNotifier"
+			}
 		},
 		{
 			"label": "publish (functions)",
@@ -51,19 +70,20 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"type": "process",
+			"type": "shell",
 			"dependsOn": "clean release (functions)",
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/AzureNotifier"
+			}
 		},
 		{
-			"type": "func",
-			"dependsOn": "build (functions)",
+			"label": "host functions",
+			"command": "func host start",
+			"type": "shell",
 			"options": {
-				"cwd": "${workspaceFolder}/bin/Debug/net6.0"
-			},
-			"command": "host start",
-			"isBackground": true,
-			"problemMatcher": "$func-dotnet-watch"
+			  "cwd": "${workspaceFolder}/AzureNotifier"
+			}
 		}
 	]
 }
