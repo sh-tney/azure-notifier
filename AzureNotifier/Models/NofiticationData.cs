@@ -2,10 +2,10 @@ namespace AzureNotifier.Models
 {
     public class NotificationData
     {
-        [JsonProperty("name")]
-        public string Name;
+        [JsonProperty("mobile")]
+        public string MobileNumber;
 
-        [JsonProperty("messageContent")]
-        public string MessageContent;
+        [JsonProperty("message")]
+        public string Message;
     }
 }

@@ -6,18 +6,21 @@ global using Newtonsoft.Json;
 global using IO.ClickSend.Client;
 global using IO.ClickSend.ClickSend.Api;
 global using IO.ClickSend.ClickSend.Model;
+global using System.Diagnostics.CodeAnalysis;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Azure.WebJobs;
 global using Microsoft.Azure.WebJobs.Extensions.Http;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Logging;
 global using AzureNotifier.Models;
+global using AzureNotifier.Services;
 
 namespace AzureNotifier;
 
 /// <summary>
 /// Static class to contain global constants/shared objects, as well as house global using statements.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class Globals {
     public static readonly Configuration clickSendConfig = new Configuration {
         Username = Environment.GetEnvironmentVariable("CLICKSEND_API_USERNAME"),
