@@ -11,9 +11,9 @@ global using Microsoft.Azure.WebJobs;
 global using Microsoft.Azure.WebJobs.Extensions.Http;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Logging;
-global using sh.tney.Models;
+global using AzureNotifier.Models;
 
-namespace sh.tney;
+namespace AzureNotifier;
 
 /// <summary>
 /// Static class to contain global constants/shared objects, as well as house global using statements.

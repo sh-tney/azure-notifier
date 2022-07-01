@@ -1,4 +1,4 @@
-namespace sh.tney.Models
+namespace AzureNotifier.Models
 {
     public class NotificationData
     {

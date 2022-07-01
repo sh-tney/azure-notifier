@@ -1,4 +1,4 @@
-namespace sh.tney.Functions;
+namespace AzureNotifier.Functions;
 
 public static class SendSMS
 {
