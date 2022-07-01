@@ -4,6 +4,8 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureNotifier", "AzureNotifier\AzureNotifier.csproj", "{69E37CEC-5896-49D7-9A71-90ABD5449689}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureNotifier.Test", "AzureNotifier.Test\AzureNotifier.Test.csproj", "{BD002F2F-DE6B-4619-8D4C-194427DDE7E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{69E37CEC-5896-49D7-9A71-90ABD5449689}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69E37CEC-5896-49D7-9A71-90ABD5449689}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69E37CEC-5896-49D7-9A71-90ABD5449689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD002F2F-DE6B-4619-8D4C-194427DDE7E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD002F2F-DE6B-4619-8D4C-194427DDE7E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD002F2F-DE6B-4619-8D4C-194427DDE7E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD002F2F-DE6B-4619-8D4C-194427DDE7E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
