@@ -13,5 +13,6 @@ global using AzureNotifier.Functions;
 global using AzureNotifier.Services;
 global using AzureNotifier.Models;
 global using Newtonsoft.Json;
+global using IO.ClickSend.ClickSend.Model;
 
 namespace AzureNotifier.Test;
