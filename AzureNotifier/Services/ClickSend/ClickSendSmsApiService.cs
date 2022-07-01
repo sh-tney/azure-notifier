@@ -1,4 +1,4 @@
-namespace AzureNotifier.Services;
+namespace AzureNotifier.Services.ClickSend;
 
 public interface IClickSendSmsApiWrapper {
     string SmsSendPost(SmsMessageCollection smsMessageCollection);

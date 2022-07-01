@@ -14,6 +14,7 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Logging;
 global using AzureNotifier.Models;
 global using AzureNotifier.Services;
+global using AzureNotifier.Services.ClickSend;
 
 namespace AzureNotifier;
 
@@ -27,5 +28,6 @@ public static class Globals {
         Password = Environment.GetEnvironmentVariable("CLICKSEND_API_PASSWORD")
     };
 
+    public static readonly string ClickSendEmailFromAddressId = Environment.GetEnvironmentVariable("CLICKSEND_EMAIL_ADDRESS_ID");
     public static readonly SMSApi clickSendSMSApi = new SMSApi(clickSendConfig);
 }

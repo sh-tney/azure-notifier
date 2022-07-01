@@ -9,8 +9,12 @@ public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
-        // Services
+        // Api Wrappers
         builder.Services.AddSingleton<IClickSendSmsApiWrapper, ClickSendSmsApiWrapper>();
+        builder.Services.AddSingleton<IClickSendEmailApiWrapper, ClickSendEmailApiWrapper>();
+
+        // Services
         builder.Services.AddSingleton<ISmsApiService, ClickSendSmsApiService>();
+        builder.Services.AddSingleton<IEmailApiService, ClickSendEmailApiService>();
     }
 }

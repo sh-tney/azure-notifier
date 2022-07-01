@@ -1,19 +1,19 @@
 namespace AzureNotifier.Functions;
 
-public interface ISendSmsFunction {
-    Task<IActionResult> SendSms(HttpRequest req, ILogger log);
+public interface ISendEmailFunction {
+    Task<IActionResult> SendEmail(HttpRequest req, ILogger log);
 }
 
-public class SendSmsFunction : ISendSmsFunction
+public class SendEmailFunction : ISendEmailFunction
 {
-    private ISmsApiService _smsApiService;
+    private IEmailApiService _emailApiService;
 
-    public SendSmsFunction(ISmsApiService smsApiService){
-        _smsApiService = smsApiService;
+    public SendEmailFunction(IEmailApiService emailApiService){
+        _emailApiService = emailApiService;
     }
 
-    [FunctionName(nameof(SendSms))]
-    public async Task<IActionResult> SendSms(
+    [FunctionName(nameof(SendEmail))]   
+    public async Task<IActionResult> SendEmail(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
         ILogger log)
     {
@@ -25,18 +25,19 @@ public class SendSmsFunction : ISendSmsFunction
             var data = JsonConvert.DeserializeObject<NotificationData>(requestBody);
 
             if(string.IsNullOrEmpty(data?.Message)) {
-                log.LogWarning("Failed SendSMS attempt: No Message Content");
+                log.LogWarning("Failed SendEmail attempt: No Message Content");
                 return new BadRequestObjectResult("No Message Content");
             }
 
-            if(string.IsNullOrEmpty(data.MobileNumber)) {
-                log.LogWarning("Failed SendSMS attempt: No Mobile Number");
-                return new BadRequestObjectResult("No Mobile Number");
+            if(string.IsNullOrEmpty(data.EmailAddress)) {
+                log.LogWarning("Failed SendEmail attempt: No Email Address");
+                return new BadRequestObjectResult("No Email Address");
             }
 
-            response = _smsApiService.SendSms(data.MobileNumber, data.Message);
+            response = _emailApiService.SendEmail(data.EmailAddress, data.Message, "AzureNotififer Email Test");
 
-        } catch (InvalidOperationException ex) { // Covers ClickSend Api Invalid-Success error cases.
+        } catch (InvalidOperationException ex) {
+            // Covers ClickSend Api Invalid-Success error cases.
             log.LogError(ex.Message);
             return new BadRequestObjectResult(ex.Message);
         } catch (ApiException ex) {
@@ -50,4 +51,4 @@ public class SendSmsFunction : ISendSmsFunction
         log.LogInformation(response);
         return new OkResult();
     }
-}
+} 
