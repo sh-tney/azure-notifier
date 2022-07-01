@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace sh.tney.Models
 {
     public class NotificationData
