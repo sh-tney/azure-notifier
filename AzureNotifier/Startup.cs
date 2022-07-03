@@ -1,29 +1,35 @@
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-[assembly: FunctionsStartup(typeof(AzureNotifier.Startup))]
 namespace AzureNotifier;
 
 [ExcludeFromCodeCoverage]
-public class Startup : FunctionsStartup
+public class Startup
 {
-    public override void Configure(IFunctionsHostBuilder builder)
+    public static void Main()
     {
-        // Options
-        builder.Services.AddOptions<AppSettings>().Configure<IConfiguration>(
-            (settings, configuration) =>
+        var host = new HostBuilder()
+            .ConfigureFunctionsWorkerDefaults()
+            .ConfigureServices(r =>
             {
-                configuration.GetSection("AppSettings").Bind(settings);
-            }
-        );
+                // Options
+                r.AddOptions<AppSettings>().Configure<IConfiguration>(
+                    (settings, configuration) =>
+                    {
+                        configuration.GetSection("AppSettings").Bind(settings);
+                    }
+                );
 
-        // Api Wrappers
-        builder.Services.AddSingleton<IClickSendSmsApiWrapper, ClickSendSmsApiWrapper>();
-        builder.Services.AddSingleton<IClickSendEmailApiWrapper, ClickSendEmailApiWrapper>();
+                // Api Wrappers
+                r.AddSingleton<IClickSendSmsApiWrapper, ClickSendSmsApiWrapper>();
+                r.AddSingleton<IClickSendEmailApiWrapper, ClickSendEmailApiWrapper>();
 
-        // Services
-        builder.Services.AddSingleton<ISmsApiService, ClickSendSmsApiService>();
-        builder.Services.AddSingleton<IEmailApiService, ClickSendEmailApiService>();
+                // Services
+                r.AddSingleton<ISmsApiService, ClickSendSmsApiService>();
+                r.AddSingleton<IEmailApiService, ClickSendEmailApiService>();
+            }).Build();
+
+        host.Run();
     }
 }

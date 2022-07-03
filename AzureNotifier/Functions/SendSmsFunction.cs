@@ -1,21 +1,22 @@
 namespace AzureNotifier.Functions;
 
 public interface ISendSmsFunction {
-    Task<IActionResult> SendSms(HttpRequest req, ILogger log);
+    Task<HttpResponseData> SendSms(HttpRequestData req);
 }
 
 public class SendSmsFunction : ISendSmsFunction
 {
-    private ISmsApiService _smsApiService;
+    private readonly ISmsApiService _smsApiService;
+    private readonly ILogger<SendSmsFunction> _logger;
 
-    public SendSmsFunction(ISmsApiService smsApiService){
+    public SendSmsFunction(ISmsApiService smsApiService, ILogger<SendSmsFunction> logger){
         _smsApiService = smsApiService;
+        _logger = logger;
     }
 
-    [FunctionName(nameof(SendSms))]
-    public async Task<IActionResult> SendSms(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
-        ILogger log)
+    [Function(nameof(SendSms))]
+    public async Task<HttpResponseData> SendSms(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequestData req)
     {
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         string response;
@@ -25,32 +26,42 @@ public class SendSmsFunction : ISendSmsFunction
             var data = JsonConvert.DeserializeObject<NotificationData>(requestBody);
 
             if(string.IsNullOrEmpty(data?.Message)) {
-                log.LogWarning("Failed SendSMS attempt: No Message Content");
-                return new BadRequestObjectResult("No Message Content");
+                _logger.LogWarning("Failed SendSMS attempt: No Message Content");
+                var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+                resp.WriteString("No Message Content");
+                return resp;
             }
 
             if(string.IsNullOrEmpty(data.MobileNumber)) {
-                log.LogWarning("Failed SendSMS attempt: No Mobile Number");
-                return new BadRequestObjectResult("No Mobile Number");
+                _logger.LogWarning("Failed SendSMS attempt: No Mobile Number");
+                var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+                resp.WriteString("No SMS Number");
+                return resp;
             }
 
             response = _smsApiService.SendSms(data.MobileNumber, data.Message);
 
         } catch (JsonReaderException ex) {
-            log.LogWarning(ex.Message);
-            return new BadRequestObjectResult("Invalid JSON");
+            _logger.LogWarning(ex.Message);
+            var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+            resp.WriteString("Invalid JSON");
+            return resp;
         } catch (InvalidOperationException ex) { // Covers ClickSend Api Invalid-Success error cases.
-            log.LogError(ex.Message);
-            return new BadRequestObjectResult(ex.Message);
+            _logger.LogError(ex.Message);
+            var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+            resp.WriteString(ex.Message);
+            return resp;
         } catch (ApiException ex) {
-            log.LogError(ex.Message);
-            return new BadRequestObjectResult("ClickSend Api Exception");
+            _logger.LogError(ex.Message);
+            var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+            resp.WriteString("ClickSend Api Exception");
+            return resp;
         } catch (Exception ex) { 
-            log.LogError(ex.ToString());
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            _logger.LogError(ex.ToString());
+            return req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
-        log.LogInformation(response);
-        return new OkResult();
+        _logger.LogInformation(response);
+        return req.CreateResponse(HttpStatusCode.OK);
     }
 }
