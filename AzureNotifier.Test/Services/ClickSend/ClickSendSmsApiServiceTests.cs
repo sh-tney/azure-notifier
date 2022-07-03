@@ -1,4 +1,4 @@
-namespace AzureNotifier.Test.Services;
+namespace AzureNotifier.Test.Services.ClickSend;
 
 public class ClickSendSmsApiServiceTests
 {
@@ -24,7 +24,7 @@ public class ClickSendSmsApiServiceTests
     }
 
     [Fact]
-    public void ClickSendSmsApiService_ThrowInvalidOperationExceptionWithFailCode_WhenSmsApiResponseContainsFailCode()
+    public void ClickSendSmsApiService_ThrowInvalidOperationExceptionWithFailCode_WhenApiResponseContainsFailCode()
     {
         var sampleInvalidSuccess = @"{""http_code"":200,""response_code"":""SUCCESS"",""response_msg"":""Messages queued for delivery."",""data"":{""total_price"":0,""total_count"":1,""queued_count"":0,""messages"":[{""to"":""111111111111111"",""body"":""test message"",""from"":"""",""schedule"":0,""message_id"":""8D34EE7D-EBA3-47D8-B094-5A6ECBC652F2"",""custom_string"":"""",""status"":""TEST_RESPONSE_CODE""}],""_currency"":{""currency_name_short"":""NZD"",""currency_prefix_d"":""$"",""currency_prefix_c"":""c"",""currency_name_long"":""New Zealand Dollars""}}}";
 

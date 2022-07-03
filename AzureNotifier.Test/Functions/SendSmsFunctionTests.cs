@@ -69,6 +69,19 @@ public class SendSmsFunctionTests
     }
 
     [Fact]
+    public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenSmsServiceThrowsApiException()
+    {
+        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
+
+        mockSmsApiService.Setup(x => x.SendSms(It.IsAny<string>(), It.IsAny<string>())).Throws(new ApiException());
+
+        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("ClickSend Api Exception", (result as BadRequestObjectResult)?.Value);
+    }
+
+    [Fact]
     public async Task SendSms_ShouldReturnInternalServerErrorStatus_WhenOtherExceptionIsThrown()
     {
         mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
