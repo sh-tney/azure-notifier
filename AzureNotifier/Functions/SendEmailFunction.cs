@@ -60,10 +60,15 @@ public class SendEmailFunction : ISendEmailFunction
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
             resp.WriteString(ex.Message);
             return resp;
-        } catch (ApiException ex) {
+        } catch (IO.ClickSend.Client.ApiException ex) {
             _logger.LogError(ex.Message);
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
             resp.WriteString("ClickSend Api Exception");
+            return resp;
+        } catch (Twilio.Exceptions.ApiException ex) {
+            _logger.LogError(ex.Message);
+            var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+            resp.WriteString("Twilio Api Exception");
             return resp;
         } catch (Exception ex) { 
             _logger.LogError(ex.ToString());
