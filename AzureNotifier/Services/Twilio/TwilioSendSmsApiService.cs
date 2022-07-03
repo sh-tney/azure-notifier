@@ -1,7 +1,7 @@
 namespace AzureNotifier.Services.Twilio;
 
 public interface ITwilioSmsApiWrapper {
-    MessageResource SmsSendPost(string message, string toNumber);
+    string SmsSendPost(string message, string toNumber);
 }
 
 public class TwilioSmsApiWrapper : ITwilioSmsApiWrapper {
@@ -12,14 +12,14 @@ public class TwilioSmsApiWrapper : ITwilioSmsApiWrapper {
         _twilioFromNumber = settings.Value.TwilioFromNumber;
     }
     
-    public MessageResource SmsSendPost(string mobileNumber, string message) {
+    public string SmsSendPost(string mobileNumber, string message) {
         var response = MessageResource.Create(
             body: message,
             from: new PhoneNumber(_twilioFromNumber),
             to: new PhoneNumber(mobileNumber)
         );
-
-        return response;
+        
+        return JsonConvert.SerializeObject(response);
     }
 }
 
@@ -34,6 +34,6 @@ public class TwilioSmsApiService : ISmsApiService {
     {
         var response = _smsApi.SmsSendPost(mobileNumber, message);
 
-        return JsonConvert.SerializeObject(response);
+        return response;
     }
 } 
