@@ -34,6 +34,6 @@ public class TwilioSmsApiService : ISmsApiService {
     {
         var response = _smsApi.SmsSendPost(mobileNumber, message);
 
-        return response.Sid;
+        return JsonConvert.SerializeObject(response);
     }
 } 
