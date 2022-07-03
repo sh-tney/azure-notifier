@@ -2,8 +2,7 @@
   "profiles": {
     "AzureNotifier": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7151",
-      "launchBrowser": false
+      "commandLineArgs": "host start --port 7103 --pause-on-error"
     }
   }
-}
+} 
