@@ -46,6 +46,11 @@ public class SendSmsFunction : ISendSmsFunction
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
             resp.WriteString("Invalid JSON");
             return resp;
+        } catch (JsonSerializationException ex) {
+            _logger.LogWarning(ex.Message);
+            var resp = req.CreateResponse(HttpStatusCode.BadRequest);
+            resp.WriteString("Invalid JSON");
+            return resp;
         } catch (InvalidOperationException ex) { // Covers ClickSend Api Invalid-Success error cases.
             _logger.LogError(ex.Message);
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
