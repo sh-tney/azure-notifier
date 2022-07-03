@@ -2,123 +2,91 @@ namespace AzureNotifier.Test.Functions;
 
 public class SendSmsFunctionTests 
 {
-    private Mock<ILogger> mockILogger;
-    private Mock<HttpRequest> mockRequest;
+    private Mock<ILogger<SendSmsFunction>> mockILogger;
+    private MockHttpRequestData mockRequest;
     private Mock<ISmsApiService> mockSmsApiService;
     private SendSmsFunction target;
 
     public SendSmsFunctionTests()
     {
-        mockILogger = new Mock<ILogger>();
-        mockRequest = new Mock<HttpRequest>();
+        mockILogger = new Mock<ILogger<SendSmsFunction>>();
+        mockRequest = new MockHttpRequestData(new Mock<FunctionContext>().Object, new Uri("http://google.com"));
         mockSmsApiService = new Mock<ISmsApiService>();
-        target = new SendSmsFunction(mockSmsApiService.Object);
-    }
-
-    private static Mock<HttpRequest> CreateMockRequest(NotificationData body)
-    {
-        var ms = new MemoryStream();
-        var sw = new StreamWriter(ms);
-
-        var json = JsonConvert.SerializeObject(body);
-
-        sw.Write(json);
-        sw.Flush();
-        ms.Position = 0;
-
-        var mockRequest = new Mock<HttpRequest>();
-        mockRequest.Setup(x => x.Body).Returns(ms);
-
-        return mockRequest;
+        target = new SendSmsFunction(mockSmsApiService.Object, mockILogger.Object);
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenNoMessageIsFound()
     {
-        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number" });  
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { MobileNumber = "test number" });  
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("No Message Content", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "No Message Content");
     }
 
     [Fact] 
     public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenNoMobileNumberIsFound()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message" });
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("No Mobile Number", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "No Mobile Number");
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenSmsServiceThrowsInvalidOperationException()
     {
-        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
 
         mockSmsApiService.Setup(x => x.SendSms(It.IsAny<string>(), It.IsAny<string>())).Throws(new InvalidOperationException("TEST_API_STATUS_CODE"));
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("TEST_API_STATUS_CODE", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "TEST_API_STATUS_CODE");
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenSmsServiceThrowsApiException()
     {
-        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
 
         mockSmsApiService.Setup(x => x.SendSms(It.IsAny<string>(), It.IsAny<string>())).Throws(new ApiException());
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("ClickSend Api Exception", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "ClickSend Api Exception");
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenJSONIsInvalid()
     {
-        var ms = new MemoryStream();
-        var sw = new StreamWriter(ms);
+        mockRequest = TestHelpers.CreateMockRequest("{\"mobile\": \"+14055555555\" \"messsage\": \"test message\"}");
 
-        sw.Write("{\"mobile\": \"+14055555555\" \"messsage\": \"test message\"}");
-        sw.Flush();
-        ms.Position = 0;
+        var result = await target.SendSms(mockRequest);
 
-        var mockRequest = new Mock<HttpRequest>();
-        mockRequest.Setup(x => x.Body).Returns(ms);
-
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
-
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Invalid JSON", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "Invalid JSON");
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnInternalServerErrorStatus_WhenOtherExceptionIsThrown()
     {
-        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
-
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
         mockSmsApiService.Setup(x => x.SendSms(It.IsAny<string>(), It.IsAny<string>())).Throws(new FileNotFoundException("Some random exception"));
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<StatusCodeResult>(result);
-        Assert.Equal(StatusCodes.Status500InternalServerError, (result as StatusCodeResult)?.StatusCode);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.InternalServerError, null);
     }
 
     [Fact]
     public async Task SendSms_ShouldReturnOkResult_WhenMobileNumberAndMessageAreProvided()
     {
-        mockRequest = CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { MobileNumber = "test number", Message = "test message" });
 
-        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendSms(mockRequest);
 
-        Assert.IsType<OkResult>(result);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.OK, null);
     }
 } 

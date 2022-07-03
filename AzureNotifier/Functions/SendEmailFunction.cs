@@ -47,7 +47,7 @@ public class SendEmailFunction : ISendEmailFunction
         } catch (JsonReaderException ex) {
             _logger.LogWarning(ex.Message);
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
-            resp.WriteString("Invalid JSON.");
+            resp.WriteString("Invalid JSON");
             return resp;
         } catch (InvalidOperationException ex) {
             // Covers ClickSend Api Invalid-Success error cases.
@@ -58,7 +58,7 @@ public class SendEmailFunction : ISendEmailFunction
         } catch (ApiException ex) {
             _logger.LogError(ex.Message);
             var resp = req.CreateResponse(HttpStatusCode.BadRequest);
-            resp.WriteString("ClickSend Api Exception.");
+            resp.WriteString("ClickSend Api Exception");
             return resp;
         } catch (Exception ex) { 
             _logger.LogError(ex.ToString());

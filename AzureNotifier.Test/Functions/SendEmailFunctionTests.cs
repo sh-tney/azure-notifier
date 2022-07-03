@@ -2,123 +2,89 @@ namespace AzureNotifier.Test.Functions;
 
 public class SendEmailFunctionTests
 {
-    private Mock<ILogger> mockILogger;
-    private Mock<HttpRequest> mockRequest;
+    private Mock<ILogger<SendEmailFunction>> mockILogger;
+    private MockHttpRequestData mockRequest;
     private Mock<IEmailApiService> mockEmailApiService;
     private SendEmailFunction target;
 
     public SendEmailFunctionTests()
     {
-        mockILogger = new Mock<ILogger>();
-        mockRequest = new Mock<HttpRequest>();
+        mockILogger = new Mock<ILogger<SendEmailFunction>>();
+        mockRequest = new MockHttpRequestData(new Mock<FunctionContext>().Object, new Uri("http://google.com"));
         mockEmailApiService = new Mock<IEmailApiService>();
-        target = new SendEmailFunction(mockEmailApiService.Object);
-    }
-
-    private static Mock<HttpRequest> CreateMockRequest(NotificationData body)
-    {
-        var ms = new MemoryStream();
-        var sw = new StreamWriter(ms);
-
-        var json = JsonConvert.SerializeObject(body);
-
-        sw.Write(json);
-        sw.Flush();
-        ms.Position = 0;
-
-        var mockRequest = new Mock<HttpRequest>();
-        mockRequest.Setup(x => x.Body).Returns(ms);
-
-        return mockRequest;
+        target = new SendEmailFunction(mockEmailApiService.Object, mockILogger.Object);
     }
 
     [Fact]
-    public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenNoTokenIsFound()
+    public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenNoMessageIsFound()
     {
-        mockRequest = CreateMockRequest(new NotificationData { EmailAddress = "test address" });  
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { EmailAddress = "test address" });  
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("No Message Content", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "No Message Content");
     }
 
     [Fact] 
     public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenNoEmailAddressIsFound()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message" });
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("No Email Address", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "No Email Address");
     }
 
     [Fact]
     public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenEmailServiceThrowsInvalidOperationException()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
-
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
         mockEmailApiService.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Throws(new InvalidOperationException("TEST_API_STATUS_CODE"));
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("TEST_API_STATUS_CODE", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "TEST_API_STATUS_CODE");
     }
 
     [Fact]
     public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenEmailServiceThrowsApiException()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
-
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
         mockEmailApiService.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Throws(new ApiException());
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("ClickSend Api Exception", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "ClickSend Api Exception");
     }
 
     [Fact]
     public async Task SendEmail_ShouldReturnBadRequestObjectResult_WhenJSONIsInvalid()
     {
-        var ms = new MemoryStream();
-        var sw = new StreamWriter(ms);
+        var mockRequest = TestHelpers.CreateMockRequest("{\"email\": \"test@xyz.com\" \"message\": \"test message\"}");
 
-        sw.Write("{\"email\": \"test@xyz.com\" \"message\": \"test message\"}");
-        sw.Flush();
-        ms.Position = 0;
+        var result = await target.SendEmail(mockRequest);
 
-        var mockRequest = new Mock<HttpRequest>();
-        mockRequest.Setup(x => x.Body).Returns(ms);
-
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
-
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Invalid JSON", (result as BadRequestObjectResult)?.Value);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.BadRequest, "Invalid JSON");
     }
 
     [Fact]
     public async Task SendEmail_ShouldReturnInternalServerErrorStatus_WhenOtherExceptionIsThrown()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
-
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message", EmailAddress = "test address" });
         mockEmailApiService.Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Throws(new FileNotFoundException("Some random exception"));
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<StatusCodeResult>(result);
-        Assert.Equal(StatusCodes.Status500InternalServerError, (result as StatusCodeResult)?.StatusCode);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.InternalServerError, null);
     }
 
     [Fact]
-    public async Task SendEmail_ShouldReturnOkResult_WhenTokenAndSmsNumberAreProvided()
+    public async Task SendEmail_ShouldReturnOkResult_WhenMessageAndEmailAddressAreProvided()
     {
-        mockRequest = CreateMockRequest(new NotificationData { Message = "test message" , EmailAddress = "test address" });
+        mockRequest = TestHelpers.CreateMockRequest(new NotificationData { Message = "test message" , EmailAddress = "test address" });
 
-        var result = await target.SendEmail(mockRequest.Object, mockILogger.Object);
+        var result = await target.SendEmail(mockRequest);
 
-        Assert.IsType<OkResult>(result);
+        TestHelpers.ValidateHttpResponseData(result, HttpStatusCode.OK, null);
     }
 } 

@@ -35,7 +35,7 @@ public class SendSmsFunction : ISendSmsFunction
             if(string.IsNullOrEmpty(data.MobileNumber)) {
                 _logger.LogWarning("Failed SendSMS attempt: No Mobile Number");
                 var resp = req.CreateResponse(HttpStatusCode.BadRequest);
-                resp.WriteString("No SMS Number");
+                resp.WriteString("No Mobile Number");
                 return resp;
             }
 
