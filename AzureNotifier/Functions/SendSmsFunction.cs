@@ -36,6 +36,9 @@ public class SendSmsFunction : ISendSmsFunction
 
             response = _smsApiService.SendSms(data.MobileNumber, data.Message);
 
+        } catch (JsonReaderException ex) {
+            log.LogWarning(ex.Message);
+            return new BadRequestObjectResult("Invalid JSON");
         } catch (InvalidOperationException ex) { // Covers ClickSend Api Invalid-Success error cases.
             log.LogError(ex.Message);
             return new BadRequestObjectResult(ex.Message);

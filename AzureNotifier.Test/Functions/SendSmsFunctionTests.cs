@@ -24,7 +24,6 @@ public class SendSmsFunctionTests
 
         sw.Write(json);
         sw.Flush();
-
         ms.Position = 0;
 
         var mockRequest = new Mock<HttpRequest>();
@@ -79,6 +78,25 @@ public class SendSmsFunctionTests
 
         Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("ClickSend Api Exception", (result as BadRequestObjectResult)?.Value);
+    }
+
+    [Fact]
+    public async Task SendSms_ShouldReturnBadRequestObjectResult_WhenJSONIsInvalid()
+    {
+        var ms = new MemoryStream();
+        var sw = new StreamWriter(ms);
+
+        sw.Write("{\"mobile\": \"+14055555555\" \"messsage\": \"test message\"}");
+        sw.Flush();
+        ms.Position = 0;
+
+        var mockRequest = new Mock<HttpRequest>();
+        mockRequest.Setup(x => x.Body).Returns(ms);
+
+        var result = await target.SendSms(mockRequest.Object, mockILogger.Object);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("Invalid JSON", (result as BadRequestObjectResult)?.Value);
     }
 
     [Fact]

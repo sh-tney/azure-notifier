@@ -36,6 +36,9 @@ public class SendEmailFunction : ISendEmailFunction
 
             response = _emailApiService.SendEmail(data.EmailAddress, data.Message, "AzureNotififer Email Test");
 
+        } catch (JsonReaderException ex) {
+            log.LogWarning(ex.Message);
+            return new BadRequestObjectResult("Invalid JSON");
         } catch (InvalidOperationException ex) {
             // Covers ClickSend Api Invalid-Success error cases.
             log.LogError(ex.Message);
