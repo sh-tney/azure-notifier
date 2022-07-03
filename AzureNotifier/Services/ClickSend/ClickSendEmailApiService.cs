@@ -5,8 +5,15 @@ public interface IClickSendEmailApiWrapper {
 }
 
 public class ClickSendEmailApiWrapper : IClickSendEmailApiWrapper {
-    private static readonly TransactionalEmailApi _clickSendEmailApi = new TransactionalEmailApi(Globals.clickSendConfig);
+    private readonly TransactionalEmailApi _clickSendEmailApi;
 
+    public ClickSendEmailApiWrapper(IOptions<AppSettings> settings){
+        _clickSendEmailApi = new TransactionalEmailApi(new Configuration{
+            Username = settings.Value.ClickSendUsername,
+            Password = settings.Value.ClickSendPassword
+        });
+    }
+    
     public string EmailSendPost(Email email) {
         return _clickSendEmailApi.EmailSendPost(email);
     }
@@ -14,16 +21,21 @@ public class ClickSendEmailApiWrapper : IClickSendEmailApiWrapper {
 
 public class ClickSendEmailApiService : IEmailApiService {
     private IClickSendEmailApiWrapper _emailApi;
+    private readonly string ClickSendEmailFromAddressId; 
 
-    public ClickSendEmailApiService(IClickSendEmailApiWrapper clickSendEmailApiWrapper){
+    public ClickSendEmailApiService(
+        IClickSendEmailApiWrapper clickSendEmailApiWrapper,
+        IOptions<AppSettings> settings)
+    {
         _emailApi = clickSendEmailApiWrapper;
+        ClickSendEmailFromAddressId = settings.Value.ClickSendFromEmailId;
     }
 
     public string SendEmail(string emailAddress, string message, string subject)
     {
         var email = new Email(
             to: new List<EmailRecipient>{ new EmailRecipient(emailAddress) },
-            from: new EmailFrom(Globals.ClickSendEmailFromAddressId, "AzureNotifierTest"),
+            from: new EmailFrom(ClickSendEmailFromAddressId, "AzureNotifierTest"),
             subject: subject,
             body: message
         );

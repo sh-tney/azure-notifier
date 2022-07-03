@@ -5,8 +5,15 @@ public interface IClickSendSmsApiWrapper {
 }
 
 public class ClickSendSmsApiWrapper : IClickSendSmsApiWrapper {
-    private static readonly SMSApi _clickSendSMSApi = new SMSApi(Globals.clickSendConfig);
+    private readonly SMSApi _clickSendSMSApi;
 
+    public ClickSendSmsApiWrapper(IOptions<AppSettings> settings){
+        _clickSendSMSApi = new SMSApi(new Configuration{
+            Username = settings.Value.ClickSendUsername,
+            Password = settings.Value.ClickSendPassword
+        });
+    }
+    
     public string SmsSendPost(SmsMessageCollection smsMessageCollection) {
         return _clickSendSMSApi.SmsSendPost(smsMessageCollection);
     }

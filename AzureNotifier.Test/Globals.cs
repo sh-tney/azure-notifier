@@ -6,6 +6,7 @@ global using System.Threading.Tasks;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
 global using AzureNotifier.Functions;
 global using AzureNotifier.Services;
 global using AzureNotifier.Services.ClickSend;

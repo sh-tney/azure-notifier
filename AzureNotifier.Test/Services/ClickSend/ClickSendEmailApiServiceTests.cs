@@ -3,14 +3,21 @@ namespace AzureNotifier.Test.Services.ClickSend;
 public class ClickSendEmailApiServiceTests
 {
     private Mock<IClickSendEmailApiWrapper> mockClickSendEmailApiWrapper;
+    private Mock<IOptions<AppSettings>> mockIOptions;
     private ClickSendEmailApiService target;
 
     public ClickSendEmailApiServiceTests()
     {
         mockClickSendEmailApiWrapper = new Mock<IClickSendEmailApiWrapper>();
-        target = new ClickSendEmailApiService(mockClickSendEmailApiWrapper.Object);
 
-        Environment.SetEnvironmentVariable("CLICKSEND_EMAIL_ADDRESS_ID", "test id");
+        var mockSettings = new AppSettings()
+        {
+            ClickSendFromEmailId = "mock from email"
+        };
+        mockIOptions = new Mock<IOptions<AppSettings>>();
+        mockIOptions.Setup(o => o.Value).Returns(mockSettings);
+
+        target = new ClickSendEmailApiService(mockClickSendEmailApiWrapper.Object, mockIOptions.Object);
     }
 
     [Fact]
