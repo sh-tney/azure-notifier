@@ -5,7 +5,10 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "AppSettings:ClickSendUsername": "",
     "AppSettings:ClickSendPassword": "",
-    "AppSettings:ClickSendFromEmailId": ""
+    "AppSettings:ClickSendFromEmailId": "",
+    "AppSettings:TwilioAccountSid": "",
+    "AppSettings:TwilioAuthToken": "",
+    "AppSettings:TwilioFromNumber": ""
   },
   "Host": {
     "LocalHttpPort": 7103

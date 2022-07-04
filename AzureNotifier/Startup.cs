@@ -24,9 +24,11 @@ public class Startup
                 // Api Wrappers
                 r.AddSingleton<IClickSendSmsApiWrapper, ClickSendSmsApiWrapper>();
                 r.AddSingleton<IClickSendEmailApiWrapper, ClickSendEmailApiWrapper>();
+                r.AddSingleton<ITwilioSmsApiWrapper, TwilioSmsApiWrapper>();
 
                 // Services
-                r.AddSingleton<ISmsApiService, ClickSendSmsApiService>();
+                r.AddSingleton<ISmsApiService, TwilioSmsApiService>();
+                /* r.AddSingleton<ISmsApiService, ClickSendSmsApiService>(); */
                 r.AddSingleton<IEmailApiService, ClickSendEmailApiService>();
             }).Build();
 
